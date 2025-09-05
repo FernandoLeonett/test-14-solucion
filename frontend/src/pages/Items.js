@@ -1,6 +1,6 @@
-import React, { useEffect } from 'react';
-import { useData } from '../state/DataContext';
-import { Link } from 'react-router-dom';
+import { useEffect } from "react";
+import { Link } from "react-router-dom";
+import { useData } from "../state/DataContext";
 
 function Items() {
   const { items, fetchItems } = useData();
@@ -8,10 +8,17 @@ function Items() {
   useEffect(() => {
     let active = true;
 
-    // Intentional bug: setState called after component unmount if request is slow
-    fetchItems().catch(console.error);
+    const loadItems = async () => {
+      try {
+        const data = await fetchItems();
+        if (!active) return;
+      } catch (err) {
+        console.error(err);
+      }
+    };
 
-    // Clean‑up to avoid memory leak (candidate should implement)
+    loadItems();
+
     return () => {
       active = false;
     };
@@ -21,9 +28,9 @@ function Items() {
 
   return (
     <ul>
-      {items.map(item => (
+      {items.map((item) => (
         <li key={item.id}>
-          <Link to={'/items/' + item.id}>{item.name}</Link>
+          <Link to={"/items/" + item.id}>{item.name}</Link>
         </li>
       ))}
     </ul>
