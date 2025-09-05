@@ -1,46 +1,51 @@
-# Backend Solution Overview
+# Fullstack Solution Overview
 
 ## Overview
-Refactored backend using **modern ES Modules** for Node.js 18+, emphasizing **security**, **performance**, and **testability**.
+
+Refactored backend and frontend for Node.js 18+ and React, focusing on **security**, **performance**, and **testability**.
 
 ---
 
-## Key Improvements
+## Backend Highlights
 
 ### Security
-- Removed unsafe dynamic code execution (`getCookie` with `Function.constructor`).  
-- Centralized error handling using `notFound` and `errorHandler`.
 
-### Async File Handling
-- Replaced blocking `fs.readFileSync` with non-blocking `fs/promises`.  
-- Server remains responsive even with large datasets.
+- Removed unsafe dynamic code execution (`getCookie`).
+- Centralized error handling with `notFound` and `errorHandler`.
 
-### Optimized Stats
-- `/api/stats` caches results in memory and recalculates only when the data file changes.  
-- Significantly reduces CPU usage on frequent requests.
+### Async & Performance
 
-### Items API Enhancements
-- Supports server-side search (`q` param) and pagination (`limit` param).  
-- Returns proper `404` errors for missing items.  
-
-### Centralized Config
-- `config.js` stores paths and settings centrally.  
-- Simplifies maintenance and testing.
+- Replaced blocking `fs.readFileSync` with `fs/promises`.
+- `/api/stats` caches results and recalculates only on file changes.
+- Server-side search (`q`) and pagination (`limit`) implemented in `/api/items`.
 
 ### Testability
-- `app` exported separately from `listen` for **unit tests** with Jest.  
-- `mock-data` directory provides safe, repeatable test data.
 
-### Performance & Maintainability
-- Modular, clean code structure.  
-- Easily extendable for frontend features like virtualization, live search, and scalable datasets.
+- `app` exported separately from `listen` for **Jest unit tests**.
+- `mock-data` directory provides repeatable test scenarios.
+
+---
+
+## Frontend Highlights
+
+### Memory & Performance
+
+- Fixed memory leak in `Items.js` to avoid state updates after unmount.
+- Implemented **server-side search** and **pagination**.
+- List virtualization (react-window) for smooth rendering with large datasets.
+
+### UX Improvements
+
+- Loading skeletons added for fetch requests.
+- Improved styling and accessibility.
 
 ---
 
 ## Summary
-This refactoring ensures:
-- **Secure backend** with no unsafe dynamic code.  
-- **Non-blocking I/O** for responsive endpoints.  
-- **Cached computations** for performance-critical stats.  
-- **Fully testable routes** using Jest with mock data.  
-- **Clean, maintainable architecture** ready for future enhancements.
+
+This solution addresses the core requirements of the take-home assessment:
+
+- **Secure backend** with async I/O and cached stats.
+- **Testable API routes** with Jest and mock data.
+- **Frontend memory-safe fetching**, virtualized lists, and server-side search.
+- **Clean, maintainable architecture** ready for further enhancements.
