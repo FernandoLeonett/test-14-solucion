@@ -1,6 +1,6 @@
 import express from "express";
 import fs from "fs/promises";
-import { DATA_PATH } from "../config.js";
+import { DATA_PATH } from "../../config.js";
 
 const router = express.Router();
 
