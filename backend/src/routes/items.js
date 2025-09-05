@@ -1,46 +1,35 @@
-const express = require('express');
-const fs = require('fs');
-const path = require('path');
+import express from "express";
+import fs from "fs/promises";
+import { DATA_PATH } from "../config.js";
+
 const router = express.Router();
-const DATA_PATH = path.join(__dirname, '../../../data/items.json');
 
-// Utility to read data (intentionally sync to highlight blocking issue)
-function readData() {
-  const raw = fs.readFileSync(DATA_PATH);
-  return JSON.parse(raw);
-}
-
-// GET /api/items
-router.get('/', (req, res, next) => {
+// GET /api/items?q=&limit=
+router.get("/", async (req, res, next) => {
   try {
-    const data = readData();
-    const { limit, q } = req.query;
-    let results = data;
+    const raw = await fs.readFile(DATA_PATH, "utf-8");
+    let items = JSON.parse(raw);
 
-    if (q) {
-      // Simple substring search (sub‑optimal)
-      results = results.filter(item => item.name.toLowerCase().includes(q.toLowerCase()));
-    }
+    const { q = "", limit } = req.query;
+    if (q) items = items.filter((i) => i.name.toLowerCase().includes(q.toLowerCase()));
+    if (limit) items = items.slice(0, Number(limit));
 
-    if (limit) {
-      results = results.slice(0, parseInt(limit));
-    }
-
-    res.json(results);
+    res.json(items);
   } catch (err) {
     next(err);
   }
 });
 
 // GET /api/items/:id
-router.get('/:id', (req, res, next) => {
+router.get("/:id", async (req, res, next) => {
   try {
-    const data = readData();
-    const item = data.find(i => i.id === parseInt(req.params.id));
+    const raw = await fs.readFile(DATA_PATH, "utf-8");
+    const items = JSON.parse(raw);
+    const item = items.find((i) => i.id === parseInt(req.params.id));
     if (!item) {
-      const err = new Error('Item not found');
-      err.status = 404;
-      throw err;
+      const error = new Error("Item not found");
+      error.status = 404;
+      throw error;
     }
     res.json(item);
   } catch (err) {
@@ -49,18 +38,20 @@ router.get('/:id', (req, res, next) => {
 });
 
 // POST /api/items
-router.post('/', (req, res, next) => {
+router.post("/", async (req, res, next) => {
   try {
-    // TODO: Validate payload (intentional omission)
-    const item = req.body;
-    const data = readData();
-    item.id = Date.now();
-    data.push(item);
-    fs.writeFileSync(DATA_PATH, JSON.stringify(data, null, 2));
-    res.status(201).json(item);
+    const newItem = req.body;
+    const raw = await fs.readFile(DATA_PATH, "utf-8");
+    const items = JSON.parse(raw);
+
+    newItem.id = Date.now();
+    items.push(newItem);
+
+    await fs.writeFile(DATA_PATH, JSON.stringify(items, null, 2));
+    res.status(201).json(newItem);
   } catch (err) {
     next(err);
   }
 });
 
-module.exports = router;
+export default router;

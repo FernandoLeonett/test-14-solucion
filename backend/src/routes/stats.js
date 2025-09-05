@@ -1,23 +1,32 @@
-const express = require('express');
-const fs = require('fs');
-const path = require('path');
+import express from "express";
+import fs from "fs/promises";
+import { DATA_PATH } from "../config.js";
+import mean from "../utils/stats.js";
+
 const router = express.Router();
-const DATA_PATH = path.join(__dirname, '../../data/items.json');
 
-// GET /api/stats
-router.get('/', (req, res, next) => {
-  fs.readFile(DATA_PATH, (err, raw) => {
-    if (err) return next(err);
+let cachedStats = null;
+let lastModified = null;
 
-    const items = JSON.parse(raw);
-    // Intentional heavy CPU calculation
-    const stats = {
-      total: items.length,
-      averagePrice: items.reduce((acc, cur) => acc + cur.price, 0) / items.length
-    };
+router.get("/", async (req, res, next) => {
+  try {
+    const statsFile = await fs.stat(DATA_PATH);
 
-    res.json(stats);
-  });
+    if (!cachedStats || lastModified !== statsFile.mtimeMs) {
+      const raw = await fs.readFile(DATA_PATH, "utf-8");
+      const items = JSON.parse(raw);
+
+      const total = items.length;
+      const averagePrice = mean(items.map((i) => i.price));
+
+      cachedStats = { total, averagePrice };
+      lastModified = statsFile.mtimeMs;
+    }
+
+    res.json(cachedStats);
+  } catch (err) {
+    next(err);
+  }
 });
 
-module.exports = router;
+export default router;
