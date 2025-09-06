@@ -34,6 +34,12 @@ Refactored backend and frontend for Node.js 18+ and React, focusing on **securit
 - Implemented **server-side search** and **pagination**.
 - List virtualization (react-window) for smooth rendering with large datasets.
 
+### Stats Component
+
+- Added `Stats.js` to display total items and average price using `/api/stats`.
+- Integrated navigation link to view stats.
+- Fetching handled via `DataContext` for consistency with items API.
+
 ### UX Improvements
 
 - Loading skeletons added for fetch requests.
@@ -41,11 +47,14 @@ Refactored backend and frontend for Node.js 18+ and React, focusing on **securit
 
 ---
 
-## Summary
+## Running Backend + Frontend Together
 
-This solution addresses the core requirements of the take-home assessment:
+With `concurrently` installed:
 
-- **Secure backend** with async I/O and cached stats.
-- **Testable API routes** with Jest and mock data.
-- **Frontend memory-safe fetching**, virtualized lists, and server-side search.
-- **Clean, maintainable architecture** ready for further enhancements.
+```json
+"scripts": {
+  "dev:all": "concurrently \"npm run dev\" \"cd ../frontend && npm start\""
+}
+Then run:
+npm run dev:all
+```
